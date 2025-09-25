@@ -22,7 +22,7 @@
     const uploadUrl = `http://${esp32Ip}/upload`;
 
     // Step 1: Generate QR code
-    const qrData = "HelloESP32";  // This can be dynamic (like user ID, product ID, etc.)
+    const qrData = "User Id - 01 , Name - Rohit Jadhav , This is Qr scan and send data to ESP32 ";  // This can be dynamic (like user ID, product ID, etc.)
     new QRCode(document.getElementById("qrcode"), {
       text: qrData,
       width: 200,

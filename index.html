@@ -1,42 +1,58 @@
-
-<!doctype html>
+<!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8" />
-  <title>QR → ESP32</title>
+  <meta charset="utf-8">
+  <title>QR Demo with ESP32</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <script src="https://unpkg.com/html5-qrcode@2.3.7/minified/html5-qrcode.min.js"></script>
 </head>
 <body>
-  <h3>Scan QR and send to ESP32</h3>
-  <div id="reader" style="width:300px"></div>
-  <p id="status"></p>
+  <h2>QR Code → ESP32</h2>
+
+  <h3>Generated QR:</h3>
+  <div id="qrcode"></div>
+
+  <h3>Scan QR:</h3>
+  <div id="reader" style="width:300px; border:1px solid gray"></div>
+  <p id="status">Waiting...</p>
 
   <script>
-    const esp32Ip = "192.168.1.50"; // replace with the IP printed in Serial Monitor
+    // Replace with your ESP32 IP
+    const esp32Ip = "192.168.1.50";
     const uploadUrl = `http://${esp32Ip}/upload`;
 
-    function onScanSuccess(qrText) {
-      document.getElementById('status').innerText = "Scanned: " + qrText + " → sending...";
-      // POST JSON to ESP32
-      fetch(uploadUrl, {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({qr: qrText})
-      }).then(res => {
-        document.getElementById('status').innerText = "Sent: " + qrText + " (resp " + res.status + ")";
-      }).catch(err => {
-        document.getElementById('status').innerText = "Error: " + err;
-      });
+    // Step 1: Generate QR code
+    const qrData = "HelloESP32";  // This can be dynamic (like user ID, product ID, etc.)
+    new QRCode(document.getElementById("qrcode"), {
+      text: qrData,
+      width: 200,
+      height: 200
+    });
 
-      // stop scan if you want
-      // html5QrcodeScanner.clear();
+    // Step 2: Scan and send
+    function onScanSuccess(qrText) {
+      document.getElementById("status").innerText =
+        "Scanned: " + qrText + " → sending...";
+      fetch(uploadUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ qr: qrText })
+      })
+        .then((res) => {
+          document.getElementById("status").innerText =
+            "Sent to ESP32: " + qrText + " (HTTP " + res.status + ")";
+        })
+        .catch((err) => {
+          document.getElementById("status").innerText = "Error: " + err;
+        });
     }
 
-    var html5QrcodeScanner = new Html5QrcodeScanner(
+    const scanner = new Html5QrcodeScanner(
       "reader",
-      { fps: 10, qrbox: 250 },
-      /* verbose= */ false);
-    html5QrcodeScanner.render(onScanSuccess);
+      { fps: 10, qrbox: 200 },
+      false
+    );
+    scanner.render(onScanSuccess);
   </script>
 </body>
 </html>
